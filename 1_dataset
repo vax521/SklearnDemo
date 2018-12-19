@@ -1,0 +1,12 @@
+from sklearn import datasets
+import matplotlib.pyplot as plt
+
+digits = datasets.load_digits()
+print(digits.images.shape)
+plt.imshow(digits.images[0])
+
+data = digits.images.reshape((digits.images.shape[0], -1))
+print(data.shape)
+test_list = [1, 2, 3, 4, 5, 6]
+print(test_list[:-2])
+print(test_list[:2])
