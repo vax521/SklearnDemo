@@ -4,7 +4,10 @@ from sklearn import metrics
 from sklearn import datasets
 from sklearn.metrics import classification_report
 from sklearn.externals import joblib
-
+import matplotlib
+import matplotlib.pyplot as plt
+# pycharm中引用
+matplotlib.use('Agg')
 
 # 朴素贝叶斯
 def native_bayes_classifier(train_x, train_y):
@@ -34,15 +37,16 @@ def logistic_regression_classifier(train_x,train_y):
 # 决策树
 def decsion_tree_classifier(train_x, train_y):
     from sklearn import tree
-    model = tree.DecisionTreeClassifier
+    model = tree.DecisionTreeClassifier()
     model.fit(train_x, train_y)
+    return model
 
 
 # 随机森林
-def random_forest_classifier(train_x,train_y):
+def random_forest_classifier(train_x, train_y):
     from sklearn.ensemble import RandomForestClassifier
     model = RandomForestClassifier(n_estimators=8)
-    model.fit(train_x,train_y)
+    model.fit(train_x, train_y)
     return model
 
 
@@ -58,7 +62,7 @@ def gbdt_classifier(train_x, train_y):
 def svm_classifier(train_x, train_y):
     from sklearn.svm import SVC
     model = SVC(kernel='rbf', probability=True)
-    model.fit(train_x,train_y)
+    model.fit(train_x, train_y)
     return model
 
 
@@ -87,7 +91,7 @@ def load_data():
     return data[index[:60000]], target[index[:60000]], data[index[60000:]], target[index[60000:]]
 
 
-if __name__== '__main__':
+if __name__ == '__main__':
     model_save_file = None
     model_save = {}
     test_classifiers = ['NB', 'KNN', 'LR', 'RF', 'DT', 'SVM', 'GBDT']
@@ -102,19 +106,45 @@ if __name__== '__main__':
                    }
     print("加载数据....")
     train_x, train_y, test_x, test_y = load_data()
+
+    # 保存训练监测数据
+    train_time_cost = []
+    test_time_cost = []
+    model_accuracy = []
+
+    # 画图
+    fig, ax = plt.subplots()
+    total_width, n = 0.8, 3
+    width = total_width / n
+    x = np.arange(7)
+
     for classifier in test_classifiers:
         print("******************** %s *************" % classifier )
         start_time = time.time()
         model = classifiers[classifier](train_x, train_y)
-        print('training took %f s!' % (time.time() - start_time))
+        train_time = time.time() - start_time
+        print('training took %f s!' % train_time)
+        train_time_cost.append(train_time)
+        test_time_start = time.time()
         is_binary_class = (len(np.unique(train_y)) == 2)
         predict = model.predict(test_x)
+        test_time = time.time() - start_time
+        print('testing took %f s!' % test_time)
+        test_time_cost.append(test_time)
         # 保存模型
-        joblib.dump(model, classifier+'.pkl')
+        joblib.dump(model, './model/'+classifier+'.pkl')
         print(classification_report(test_y, predict))
         if is_binary_class:
             precision = metrics.precision_score(test_y, predict)
             recall = metrics.recall_score(test_y, predict)
             print('precision: %.2f%%, recall: %.2f%%' % (100 * precision, 100 * recall))
         accuracy = metrics.accuracy_score(test_y, predict)
+        model_accuracy.append(accuracy)
         print('accuracy: %.2f%%' % (100 * accuracy))
+
+    ax.bar(x, model_accuracy, width=width, label="accuracy")
+    ax.bar(x + width, train_time_cost, width=width, label="train_time")
+    ax.bar(x + 2 * width, test_time_cost, width=width, label="test_time")
+    ax.set_xticklabels(('NB', 'KNN', 'LR', 'RF', 'DT', 'SVM', 'GBDT'))
+    plt.savefig("./image/MultiModelsResult.png")
+    plt.show()

@@ -1,0 +1,24 @@
+NB
+training took 0.221000 s!
+testing took 0.249000 s!
+accuracy: 82.35%
+
+KNN
+training took 20.265000 s!
+testing took 831.395000 s!
+accuracy: 97.06%
+
+***** LR *************
+training took 2551.636705 s!
+testing took 2551.673702 s!
+accuracy: 91.41%
+
+******* RF *************
+training took 3.552645 s!
+testing took 3.609639 s!
+accuracy: 93.85%
+
+ DT *************
+training took 20.882911 s!
+testing took 20.909909 s!
+accuracy: 87.48%
